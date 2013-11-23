@@ -9,7 +9,7 @@ Setup Examples
 --------------
 
 Clone the repository `git clone https://github.com/GordyD/radialplot.git` and then step into the directory `cd angular-radial-plot`.
-Run `npm install` and `bower install`, then finally execute `node app.js`. Go to 'http://localhost:3000/example.html' to see example radial plots.
+Run `npm install` and `bower install`, then finally execute `node app.js`. Go to `http://localhost:3000/example.html` to see example radial plots.
 
 Usage
 -----
@@ -17,7 +17,8 @@ Usage
 In order to use in your project you will need to:
 
 1. include radialplot.js as one of your source files e.g `<script src="src/radialplot.js">`
-2. include ui.radialplot as a dependency of your Angular app e.g. `var app = angular.module('radialPlotExampleApp', ['ui.radialplot']);
+2. include radialplot.css for styling
+3. include ui.radialplot as a dependency of your Angular app e.g. `var app = angular.module('radialPlotExampleApp', ['ui.radialplot']);`
 
 Features
 --------
