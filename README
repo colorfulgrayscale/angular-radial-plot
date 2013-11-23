@@ -1,0 +1,32 @@
+ÂRadialPlot 
+===========
+
+An Angular.js directive for creating customisable, radial plots. 
+
+Setup Examples
+--------------
+
+`git clone https://github.com/GordyD/radialplot.git`
+`cd radialplot`
+`npm install`
+`bower install`
+`node app.js`
+
+Go to 'http://localhost:3000/example.html' to see example radial plots.
+
+Features
+--------
+
+- Plot a 1-n dimension radial plot
+- Labelling 
+- Linear or logarithic scaling
+- Interactive - can be used as an input device
+- Overlay comparison plot on graph
+- Animate between different sets of values
+- Styleable
+ 
+Planned Improvements
+--------------------
+
+- Unit tests 
+- Improve interactive mode on mobile
