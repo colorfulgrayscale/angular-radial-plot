@@ -1,0 +1,24 @@
+{
+  "name": "radial_plot",
+  "version": "0.0.1",
+  "authors": [
+    "Gordon Murray Dent <gordonmdent@gmail.com>"
+  ],
+  "description": "An angular.js directive for displaying radial graphs",
+  "keywords": [
+    "Angular.js",
+    "d3.js"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.2",
+    "d3": "~3.3.10"
+  }
+}

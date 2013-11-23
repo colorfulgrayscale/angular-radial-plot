@@ -1,0 +1,98 @@
+/** Radial Plot Styling */
+.centre {
+    fill: white;
+    stroke: #0099FF;
+    stroke-width: 0.2;
+}
+
+.area {
+  fill: #0099FF;
+  fill-opacity: 0.3;
+  stroke: #0099FF;
+  stroke-width: 0.2;
+}
+
+.compare-area {
+  fill: #19D119;
+  fill-opacity: 0.2;
+  stroke: #19D119;
+  stroke-width: 0.3;
+}
+
+.area-invalid {
+  fill: #FF0000;
+  fill-opacity: 0.3;
+  stroke: #FF0000;
+  stroke-width: 0.2;
+}
+
+.invalid {
+  color: #FF0000;
+}
+
+.point {
+  fill: #0099FF;
+}
+
+.point-invalid {
+  fill: #FF0000;
+}
+
+.axis {
+  stroke: #666666;
+  stroke-width: 0.3;
+}
+
+.increment-label {
+    font-family: "Verdana", sans-serif;
+    font-size: 2px;
+    fill: #666666;
+}
+
+.increment-a,.increment-a-outer {
+    fill: #E6E6E6;
+    fill-opacity: 0.3;
+    stroke: #666666;
+    stroke-width: 0.2;
+}
+
+.increment-b, .increment-b-outer {
+    fill: white;
+    fill-opacity: 0.3;
+    stroke: #666666;
+    stroke-width: 0.2;
+}
+
+.increment-a-outer, .increment-b-outer {
+    stroke-width: 0.5;
+    stroke: #666666;
+    fill: none;
+}
+
+.label {
+    font-family: "Verdana", sans-serif;
+    font-size: 0.17em;
+    fill: black;
+}
+
+.tooltip-text {
+    font-family: "Verdana", sans-serif;
+    font-size: 0.21em;
+    font-weight: bold;
+    fill: black;
+}
+
+.tooltip-box {
+    fill: #666666;
+    fill-opacity: 0.6;
+    stroke: #666666;
+    stroke-width: 0.2;
+}
+
+svg {
+  width: 100%;
+}
+
+.plot svg {
+  height: 300px;
+}
