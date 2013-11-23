@@ -1,7 +1,9 @@
-ÂRadialPlot 
-===========
+Angular.js Radial Plot Directive
+================================
 
-An Angular.js directive for creating customisable, radial plots. 
+I think radial plots are cool. I also think Angular.js and d3.js are cool, so I decided to create an Angular.js directive for creating customisable radial plots... and here it is! :)
+
+I welcome any contributions. Please feel free to fork and improve.
 
 Setup Examples
 --------------
