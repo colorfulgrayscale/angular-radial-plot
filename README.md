@@ -8,13 +8,8 @@ I welcome any contributions. Please feel free to fork and improve.
 Setup Examples
 --------------
 
-`git clone https://github.com/GordyD/radialplot.git`
-`cd radialplot`
-`npm install`
-`bower install`
-`node app.js`
-
-Go to 'http://localhost:3000/example.html' to see example radial plots.
+Clone the repository `git clone https://github.com/GordyD/radialplot.git` and then step into the directory `cd angular-radial-plot`.
+Run `npm install` and `bower install`, then finally execute `node app.js`. Go to 'http://localhost:3000/example.html' to see example radial plots.
 
 Usage
 -----
