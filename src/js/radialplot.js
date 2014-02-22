@@ -222,7 +222,7 @@ angular.module('ui.radialplot', [])
           svg.append('circle')
              .attr('r', inner-1)
              .attr('class','centre')
-             .attr("transform", "translate(" + (radius + padding) + "-, " + (radius + padding) + ")");
+             .attr("transform", "translate(" + (radius + padding) + ", " + (radius + padding) + ")");
 
           points = svg.selectAll('.point')
              .data(dataset)
