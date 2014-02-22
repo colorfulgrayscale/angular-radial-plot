@@ -1,7 +1,9 @@
 Angular.js Radial Plot Directive
 ================================
 
-I think radial plots are cool. I also think Angular.js and d3.js are cool, so I decided to create an Angular.js directive for creating customisable radial plots... and here it is! :)
+I think radar graphs are cool. I also think Angular.js and d3.js are cool, so I decided to create an Angular.js directive for creating customisable radial plots... and *BLAM*, here it is!
+
+You can see a demo of the current feature set [here](http://gordyd.github.io/).
 
 I welcome any contributions. Please feel free to fork and improve.
 
