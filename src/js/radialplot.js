@@ -1,7 +1,83 @@
 'use strict';
 /* global d3 */
 
-var ui = ui || {};
+var ui = ui || { d3: {} };
+
+ui.d3.radialplot = function(scope, element, attrs) {
+  this.radius = parseInt(attrs.plotRadius) || 43;
+  this.inner = parseInt(attrs.innerRadius) || 3;
+  this.padding = parseInt(attrs.padding) || 7;
+  this.pointRadius = parseFloat(attrs.pointRadius) || 1;
+  this.editable = (attrs.editable === 'true') ? true : false;
+  this.labelled = (attrs.labelled === 'true') ? true : false;
+  this.animate = (attrs.animate === 'false') ? false : true;
+  this.delayDuration =  parseInt(attrs.delayDuration)|| 1000;
+  this.animateDuration = parseInt(attrs.animateDuration)|| 400;
+  this.radians = 2 * Math.PI;
+  this.draws = 0; 
+  this.inDrag = false; 
+  this.points; 
+  this.area;
+  this.angle; 
+  this.svg; 
+  this.line; 
+  this.increments; 
+  this.lineTween; 
+  this.incrementArc;
+  this.scaleType = attrs.scale || 'linear'; 
+  this.scale; 
+  this.increment = 20; 
+  this.areaCanvas;
+  this.freeDraw = (attrs.free === 'true') || true;
+};
+
+ui.d3.radialplot.prototype.setScale = function(scale) {
+  if (scale === 'log') {
+      this.scale = d3.scale.log()
+      .domain([1, 100])
+      .range([this.inner, this.inner + this.radius]);
+  } else {
+      this.scale = d3.scale.linear()
+      .domain([1, 100])
+      .range([this.inner, this.inner + this.radius]);
+  }
+};
+
+ui.d3.radialplot.prototype.setAngle = function(size) {
+  this.angle = d3.scale.linear()
+    .domain([0, size])
+    .range([0, this.radians]);
+};
+
+ui.d3.radialplot.prototype.setLine = function() {
+  this.line = d3.svg.line.radial()
+    .interpolate('cardinal-closed')
+    .radius(function(d) { return (d === 0) ? this.inner : this.scale(d); })
+    .angle(function(d, i) { return this.angle(i); });
+};
+
+ui.d3.radialplot.prototype.lineTween = function(start, end) {
+  return function(d, i) {
+    if (end === null || typeof end === 'undefined') {
+      end = d;
+    }
+    var interpolate = d3.interpolateArray(start, end);
+    return function(t) {
+        return line(interpolate(t),i);
+    };
+  };
+};
+
+ui.d3.radiaplot.prototype.sumCheck = function(sum) {
+  if(this.freeDraw) {
+    return true;
+  } else {
+    return (sum === 100);
+  }
+};
+
+
+
 
 ui.radialplot = function() {
   function link(scope, element, attrs) {
