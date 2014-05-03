@@ -12,7 +12,12 @@
         <h1>AngularUI Radial Plot</h1>
         <div class="plot">
                 <h3>Animated</h3>
-                <radial-plot dsn="dataset_a" point-radius="1.2" scale="log" editable="true" labelled="true" free="true" animate="true" play="others"></radial-plot>
+                <div class="half-plot">
+                        <radial-plot dsn="dataset_a" point-radius="1.2" scale="log" editable="true" labelled="true" free="true" animate="true" rounded="true" play="others"></radial-plot>
+                </div>
+                <div class="half-plot">
+                        <radial-plot dsn="dataset_a" point-radius="1.2" editable="true" labelled="true" free="true" animate="true" rounded="true" play="others"></radial-plot>
+                </div>
         </div>
         <div class="plot">
                 <h3>Basic</h3>

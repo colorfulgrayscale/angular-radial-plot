@@ -12,6 +12,7 @@ ui.radialplot = function() {
         editable = (attrs.editable === 'true') ? true : false,
         labelled = (attrs.labelled === 'true') ? true : false,
         animate = (attrs.animate === 'false') ? false : true,
+        rounded = (attrs.rounded === 'true') ? 'cardinal-closed': 'linear-closed',
         delayDuration =  parseInt(attrs.delayDuration)|| 1000,
         animateDuration = parseInt(attrs.animateDuration)|| 400,
         radians = 2 * Math.PI,
@@ -71,12 +72,12 @@ ui.radialplot = function() {
             .attr('transform', 'translate(' + (radius + padding) + ', ' + (radius + padding) + ')')
             .attr('d', line);
           d3.select(this)
-            .attr('cx', function(d,i) {
+            .attr('cx', function(d) {
                var x = (d.value === 0) ? inner : scale(scope.dsn[draggedName].value);
                var cx = x * Math.sin(angle(scope.dsn[draggedName].id));
                return cx;
             })
-           .attr('cy', function(d,i) {
+           .attr('cy', function(d) {
                var x = (d.value === 0) ? inner : scale(scope.dsn[draggedName].value);
                var cy = - x * Math.cos(angle(scope.dsn[draggedName].id));
                return cy;
@@ -101,11 +102,11 @@ ui.radialplot = function() {
       var dataset = convert(raw),
           compare = convert(scope.compare),
 
-      origin = dataset.map(function(row) { return 0; });
+      origin = dataset.map(function() { return 0; });
 
       line = d3.svg.line.radial()
-        .interpolate('cardinal-closed')
-        .radius(function(d, i) { return (d === 0) ? inner : scale(d); })
+        .interpolate(rounded)
+        .radius(function(d) { return (d === 0) ? inner : scale(d); })
         .angle(function(d, i) { return angle(i); });
 
       lineTween = function(start,end) {
@@ -257,7 +258,7 @@ ui.radialplot = function() {
             .data(dataset)
             .enter()
             .append('text')
-            .text(function(d,i){
+            .text(function(d){
               return d.name;
             })
             .attr('class','label')

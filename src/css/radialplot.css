@@ -93,6 +93,11 @@ svg {
   width: 100%;
 }
 
+.half-plot {
+  width: 50%;
+  float: left;
+}
+
 .plot svg {
   height: 300px;
 }
