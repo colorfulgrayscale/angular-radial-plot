@@ -3,7 +3,6 @@
 
 var ui = ui || { d3: {} };
 
-
 /**
  * @constructor
  * @param scope
