@@ -9,128 +9,251 @@ var ui = ui || { d3: {} };
  * @param element
  * @param attrs
  */
-ui.d3.RadialPlot = function(scope, element, attrs) {
-  this.radius = parseInt(attrs.plotRadius) || 43;
-  this.inner = parseInt(attrs.innerRadius) || 3;
-  this.padding = parseInt(attrs.padding) || 7;
-  this.pointRadius = parseFloat(attrs.pointRadius) || 1;
-  this.editable = (attrs.editable === 'true') ? true : false;
-  this.labelled = (attrs.labelled === 'true') ? true : false;
-  this.animate = (attrs.animate === 'false') ? false : true;
-  this.delayDuration =  parseInt(attrs.delayDuration)|| 1000;
-  this.animateDuration = parseInt(attrs.animateDuration)|| 400;
-  this.radians = 2 * Math.PI;
-  this.draws = 0; 
-  this.inDrag = false; 
-  this.scaleType = attrs.scale || 'linear'; 
-  this.increment = 20; 
-  this.freeDraw = (attrs.free === 'true') || true;
-  this.element = element[0];
+ui.d3.RadialPlot = function(element) {
+  this._radians = 2 * Math.PI;
+  this._draws = 0; 
+  this._inDrag = false; 
+  this._increment = 20; 
+  this._element = element;
 };
 
-ui.d3.RadialPlot.prototype.onDataLoaded_ = function(dsn, compare, scenes, scope) {
-  if (typeof dsn === 'undefined' || this.inDrag) {
+/**
+ * Set the radius of the radial plot
+ *
+ * @param {Number} plotRadius
+ */
+ui.d3.RadialPlot.prototype.setPlotRadius = function(plotRadius) {
+  this._plotRadius = plotRadius || 43;
+
+  return this;
+};
+
+/**
+ * Set the radius of the inner circle of the radial plot
+ * 
+ * @param {Number} innerRadius
+ */
+ui.d3.RadialPlot.prototype.setInnerRadius = function(innerRadius) {
+  this._innerRadius = innerRadius || 3;
+
+  return this;
+};
+
+/**
+ * Set the radius of each point for each value for each dimension
+ * 
+ * @param {Number} pointRadius
+ */
+ui.d3.RadialPlot.prototype.setPointRadius = function(pointRadius) {
+  this._pointRadius = pointRadius || 1;
+
+  return this;
+};
+
+/**
+ * Set the padding that surrounds the plot (Important to provide padding so that
+ * label display does not overrun the canvas space available)
+ * 
+ * @param {Number} padding
+ */
+ui.d3.RadialPlot.prototype.setPadding = function(padding) {
+  this._padding = padding || 7;
+
+  return this;
+};
+
+/**
+ * Set whether the plot is editable or not. Will enable the plot to be interactive
+ * 
+ * @param {Boolean} editable
+ */
+ui.d3.RadialPlot.prototype.setEditable = function(editable) {
+  this._editable = editable || false;
+
+  return this;
+};
+
+/**
+ * Set whether to display labels or not
+ * 
+ * @param {Boolean} labelled
+ */
+ui.d3.RadialPlot.prototype.setLabelled = function(labelled) {
+  this._labelled = labelled || true;
+
+  return this;
+};
+
+/**
+ * Set whether the plot is animated or not.
+ * 
+ * @param {Boolean} animated
+ */
+ui.d3.RadialPlot.prototype.setAnimated = function(animated) {
+  this._animated = animated || true;
+
+  return this;
+};
+
+/**
+ * Set the time it takes for the tween to animate and the time the resulting shape
+ * is displayed before the next set in the sequence is transitioned to
+ * 
+ * @param {Number} tweenTime
+ * @param {Number} delayTime
+ */
+ui.d3.RadialPlot.prototype.setAnimationTimes = function(tweenTime, delayTime) {
+  this._animateDuration = tweenTime || 400;
+  this._delayDuration = delayTime || 1000;
+
+  return this;
+};
+
+/**
+ * Set what scale to use: currently either linear or logarithmic
+ * 
+ * @param {Boolean} scaleType
+ */
+ui.d3.RadialPlot.prototype.setScaleType = function(scaleType) {
+  this._scaleType = scaleType || 'linear';
+
+  return this;
+};
+
+/**
+ * Set whether the plot is restricted to totalling 100 or not
+ * 
+ * @param {Boolean} freeDraw
+ */
+ui.d3.RadialPlot.prototype.setFreeDraw = function(freeDraw) {
+  this._freeDraw = freeDraw;
+
+  return this;
+};
+
+
+/**
+ * When any underlying change to the data is made this method should be called
+ * to update the radial plot
+ *
+ * @param {Array} dsn
+ * @param {Array|null} compare
+ * @param {Array|null} scenes
+ * @param {Object} scope
+ */
+ui.d3.RadialPlot.prototype.onDataChanged = function(dsn, compare, scenes, scope) {
+  if (typeof dsn === 'undefined' || this._inDrag) {
     return;
   }
-  var dataset = this.convert(dsn),
-      compare = this.convert(compare);
+  var dataset = this._convert(dsn),
+      compare = this._convert(compare);
 
   this.origin = dataset.map(function(row) { return 0; });
 
-  this.setScale(this.scaleType);
-  this.setAngle(dataset.length);
-  this.setLine();
-  this.setIncrements();
+  this._setScale(this._scaleType);
+  this._setAngle(dataset.length);
+  this._setLine();
+  this._setIncrements();
 
-  this.setElementClass('plot-radial-plot');
-  this.clearElementContents();
+  this._setElementClass('plot-radial-plot');
+  this._clearElementContents();
 
-  this.drawPlot();
-  if (this.scaleType !== 'log') {
-    this.addIncrementLabels();
+  this._drawPlot();
+  if (this._scaleType !== 'log') {
+    this._addIncrementLabels();
   }
-  this.drawAxes(dataset);
+  this._drawAxes(dataset);
 
   if (typeof compare !== 'undefined') {
-    var cvalues = this.map(compare, function(row) { return row.value; });
-    this.drawArea(this.svg, cvalues, 'compare-area');
+    var cvalues = this._map(compare, function(row) { return row.value; });
+    this._drawArea(this.svg, cvalues, 'compare-area');
   }
 
   var sum = 0,
-      values = this.map(dataset, function(row) { sum += row.value; return row.value; });
+      values = this._map(dataset, function(row) { sum += row.value; return row.value; });
   this.areaCanvas = this.svg.append('g')
     .attr('class', 'area-g');
-  this.area = this.drawArea(this.areaCanvas, values, this.check(sum) ? 'area' : 'area-invalid');
+  this.area = this._drawArea(this.areaCanvas, values, this._checkTotal(sum) ? 'area' : 'area-invalid');
 
-  this.drawInnerCircle();
+  this._drawInnerCircle();
 
-  this.points = this.drawPoints(dataset, sum);
+  this.points = this._drawPoints(dataset, sum);
 
-  if (this.labelled) {
-    this.addLabels(dataset);
+  if (this._labelled) {
+    this._addLabels(dataset);
   }
 
-  if (this.editable) {
-    this.points.call(this.getDragBehaviour(scope));
+  if (this._editable) {
+    var drag = this._getDragBehaviour(scope);
+    this.points.call(drag);
   }
 
-  if (this.draws++ === 0 && this.animate) {
-    this.addSceneTransitions(scenes, this.area, this.points);
+  if (this._draws++ === 0 && this._animated) {
+    this._addSceneTransitions(scenes, this.area, this.points);
   } else {
-    this.points.attr('r', this.pointRadius);
+    this.points.attr('r', this._pointRadius);
     this.area.attr('d', this.line);
   }  
 };
 
-ui.d3.RadialPlot.prototype.setElementClass = function(className) {
-  d3.select(this.element[0]).attr('class', className);
+/** 
+ * Private Methods for internal workings 
+ */
+
+//Todo: Re-architect
+
+ui.d3.RadialPlot.prototype._setElementClass = function(className) {
+  d3.select(this._element).attr('class', className);
 };
 
-ui.d3.RadialPlot.prototype.clearElementContents = function(className) {
-  d3.select(this.element[0]).selectAll('*').remove();
+ui.d3.RadialPlot.prototype._clearElementContents = function(className) {
+  d3.select(this._element).selectAll('*').remove();
 }
 
-ui.d3.RadialPlot.prototype.setScale = function(scale) {
+ui.d3.RadialPlot.prototype._setScale = function(scale) {
   if (scale === 'log') {
-      this.scale = d3.scale.log()
+      this._scale = d3.scale.log()
       .domain([1, 100])
-      .range([this.inner, this.inner + this.radius]);
+      .range([this._innerRadius, this._innerRadius + this._plotRadius]);
   } else {
-      this.scale = d3.scale.linear()
+      this._scale = d3.scale.linear()
       .domain([1, 100])
-      .range([this.inner, this.inner + this.radius]);
+      .range([this._innerRadius, this._innerRadius + this._plotRadius]);
   }
 };
 
-ui.d3.RadialPlot.prototype.setAngle = function(size) {
+/**
+ * Given the number of entries in the dataset set the angle generator function
+ */
+ui.d3.RadialPlot.prototype._setAngle = function(size) {
   this.angle = d3.scale.linear()
     .domain([0, size])
-    .range([0, this.radians]);
+    .range([0, this._radians]);
 };
 
-ui.d3.RadialPlot.prototype.setLine = function() {
+ui.d3.RadialPlot.prototype._setLine = function() {
   this.line = d3.svg.line.radial()
     .interpolate('cardinal-closed')
-    .radius(function(d) { return (d === 0) ? this.inner : this.scale(d); }.bind(this))
+    .radius(function(d) { return (d === 0) ? this._innerRadius : this._scale(d); }.bind(this))
     .angle(function(d, i) { return this.angle(i); }.bind(this));
 };
 
-ui.d3.RadialPlot.prototype.setIncrements = function() {
-  this.increments = d3.range(0, 101, this.increment);
+ui.d3.RadialPlot.prototype._setIncrements = function() {
+  this._increments = d3.range(0, 101, this._increment);
 
-  this.incrementArc = d3.svg.arc()
+  this._incrementArc = d3.svg.arc()
     .innerRadius(function(d) {
-      d = d - this.increment;
-      return (d < 0) ? 0 : (d === 0) ? this.inner : this.scale(d);
+      d = d - this._increment;
+      return (d < 0) ? 0 : (d === 0) ? this._innerRadius : this._scale(d);
     }.bind(this))
     .outerRadius(function(d) {
-      return (d === 0) ? this.inner: this.scale(d);
+      return (d === 0) ? this._innerRadius: this._scale(d);
     }.bind(this))
     .startAngle(0) //converting from degs to radians
-    .endAngle(this.radians); //just radians
+    .endAngle(this._radians); //just radians
 }
 
-ui.d3.RadialPlot.prototype.lineTween = function(start, end) {
+ui.d3.RadialPlot.prototype._lineTween = function(start, end) {
   return function(d, i) {
     if (end === null || typeof end === 'undefined') {
       end = d;
@@ -142,7 +265,7 @@ ui.d3.RadialPlot.prototype.lineTween = function(start, end) {
   }.bind(this);
 };
 
-ui.d3.RadialPlot.prototype.drawAxes = function(dataset) {
+ui.d3.RadialPlot.prototype._drawAxes = function(dataset) {
   this.svg.selectAll('.axis')
     .data(dataset)
     .enter()
@@ -151,26 +274,26 @@ ui.d3.RadialPlot.prototype.drawAxes = function(dataset) {
     .attr('x1', 0)
     .attr('y1', 0)
     .attr('x2', function(d,i) {
-       return (this.inner+this.radius) * Math.sin(this.angle(i));
+       return (this._innerRadius+this._plotRadius) * Math.sin(this.angle(i));
     }.bind(this))
     .attr('y2', function(d,i) {
-       return - (this.inner+this.radius) * Math.cos(this.angle(i));
+       return - (this._innerRadius+this._plotRadius) * Math.cos(this.angle(i));
     }.bind(this))
-    .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')');
+    .attr('transform', 'translate(' + (this._plotRadius + this._padding) + ', ' + (this._plotRadius + this._padding) + ')');
 };
 
-ui.d3.RadialPlot.prototype.drawPlot = function() {
-  this.svg = d3.select(this.element).append('svg')
+ui.d3.RadialPlot.prototype._drawPlot = function() {
+  this.svg = d3.select(this._element).append('svg')
       .attr('viewBox', '0 0 100 100')
       .append('g');
 
   this.svg.append('circle')
-    .attr('r', this.inner + this.radius)
+    .attr('r', this._innerRadius + this._plotRadius)
     .attr('class','increment-a-outer')
-    .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')');
+    .attr('transform', 'translate(' + (this._plotRadius + this._padding) + ', ' + (this._plotRadius + this._padding) + ')');
 
   this.svg.selectAll('.increment')
-    .data(this.increments)
+    .data(this._increments)
     .enter()
     .append('path')
     .attr('class',function(d,i) { 
@@ -180,48 +303,48 @@ ui.d3.RadialPlot.prototype.drawPlot = function() {
           return 'increment-b';
       }
     })
-    .attr('d', this.incrementArc)
-    .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')');
+    .attr('d', this._incrementArc)
+    .attr('transform', 'translate(' + (this._plotRadius + this._padding) + ', ' + (this._plotRadius + this._padding) + ')');
 };
 
-ui.d3.RadialPlot.prototype.addIncrementLabels = function() {
-  if (this.scaleType !== 'log') {
+ui.d3.RadialPlot.prototype._addIncrementLabels = function() {
+  if (this._scaleType !== 'log') {
     this.svg.selectAll('.increment-label')
-      .data(this.increments)
+      .data(this._increments)
       .enter()
       .append('text')
       .attr('class','increment-label')
       .attr('x', 5)
-      .attr('y', function(d) { return - (this.scale(d) + (this.scale(20)/20)); }.bind(this))
+      .attr('y', function(d) { return - (this._scale(d) + (this._scale(20)/20)); }.bind(this))
       .text(function(d) {return d;})
-      .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')');
+      .attr('transform', 'translate(' + (this._plotRadius + this._padding) + ', ' + (this._plotRadius + this._padding) + ')');
   }
 };
 
-ui.d3.RadialPlot.prototype.drawInnerCircle = function() {
+ui.d3.RadialPlot.prototype._drawInnerCircle = function() {
   this.svg.append('circle')
-    .attr('r', this.inner-1)
+    .attr('r', this._innerRadius-1)
     .attr('class','centre')
-    .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')');
+    .attr('transform', 'translate(' + (this._plotRadius + this._padding) + ', ' + (this._plotRadius + this._padding) + ')');
 };
 
-ui.d3.RadialPlot.prototype.drawArea = function(canvas, data, className) {
+ui.d3.RadialPlot.prototype._drawArea = function(canvas, data, className) {
   return canvas.append('path').datum(data)
     .attr('d', this.line)
     .attr('class', className)
-    .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')');
+    .attr('transform', 'translate(' + (this._plotRadius + this._padding) + ', ' + (this._plotRadius + this._padding) + ')');
 }
 
-ui.d3.RadialPlot.prototype.drawPoints = function(dataset, sum) {
-  var radius = this.radius,
-      padding = this.padding,
+ui.d3.RadialPlot.prototype._drawPoints = function(dataset, sum) {
+  var radius = this._plotRadius,
+      padding = this._padding,
       tooltipText = this.tooltipText,
       svg = this.svg,
       points = this.svg.selectAll('.point')
         .data(dataset)
         .enter()
         .append('circle')
-        .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')')
+        .attr('transform', 'translate(' + (this._plotRadius + this._padding) + ', ' + (this._plotRadius + this._padding) + ')')
         .on('mouseover', function (d) {
            var cx =  parseFloat(d3.select(this).attr('cx')),
                x =  cx - 15,
@@ -236,20 +359,20 @@ ui.d3.RadialPlot.prototype.drawPoints = function(dataset, sum) {
         .on('mouseout', function(){
            svg.selectAll('.tooltip-box, .tooltip-text').remove();
         })
-        .attr('class', this.check(sum) ? 'point' : 'point-invalid')
+        .attr('class', this._checkTotal(sum) ? 'point' : 'point-invalid')
         .attr('r', 0)
         .attr('cx', function(d,i) {
-           var x = (d.value === 0) ? this.inner : this.scale(d.value);
+           var x = (d.value === 0) ? this._innerRadius : this._scale(d.value);
            return x * Math.sin(this.angle(i));
         }.bind(this))
         .attr('cy', function(d,i) {
-           var x = (d.value === 0) ? this.inner : this.scale(d.value);
+           var x = (d.value === 0) ? this._innerRadius : this._scale(d.value);
            return - x * Math.cos(this.angle(i));
         }.bind(this));
   return points;
 };
 
-ui.d3.RadialPlot.prototype.addLabels = function(dataset) {
+ui.d3.RadialPlot.prototype._addLabels = function(dataset) {
   this.svg.selectAll('.label')
     .data(dataset)
     .enter()
@@ -259,23 +382,23 @@ ui.d3.RadialPlot.prototype.addLabels = function(dataset) {
     })
     .attr('class','label')
     .attr('transform', function(d,i) { 
-      var transform = this.radius + this.padding,
-          x = (this.inner + this.radius+2) * Math.sin(this.angle(i-0.2)) + transform,
-          y = (-(this.inner + this.radius+2) * Math.cos(this.angle(i-0.2))) + transform,
+      var transform = this._plotRadius + this._padding,
+          x = (this._innerRadius + this._plotRadius+2) * Math.sin(this.angle(i-0.2)) + transform,
+          y = (-(this._innerRadius + this._plotRadius+2) * Math.cos(this.angle(i-0.2))) + transform,
           rotation = this.angle(i) * (180/Math.PI);
       return 'translate('+x+','+y+') rotate(' + rotation + ')'; 
     }.bind(this));
 }
 
-ui.d3.RadialPlot.prototype.check = function(sum) {
-  if(this.freeDraw) {
+ui.d3.RadialPlot.prototype._checkTotal = function(sum) {
+  if(this._freeDraw) {
     return true;
   } else {
     return (sum === 100);
   }
 };
 
-ui.d3.RadialPlot.prototype.map = function(object, func) {
+ui.d3.RadialPlot.prototype._map = function(object, func) {
   var output = [];
   for(var x in object) {
     output.push(func(object[x]));
@@ -283,7 +406,7 @@ ui.d3.RadialPlot.prototype.map = function(object, func) {
   return output;
 };
 
-ui.d3.RadialPlot.prototype.convert = function(object) {
+ui.d3.RadialPlot.prototype._convert = function(object) {
   if(object instanceof Array) {
     return object;
   }
@@ -294,13 +417,14 @@ ui.d3.RadialPlot.prototype.convert = function(object) {
   return dataset;
 };
 
-ui.d3.RadialPlot.prototype.getDragBehaviour = function(scope) {
-  var drag = d3.behavior.drag()
+ui.d3.RadialPlot.prototype._getDragBehaviour = function(scope) {
+  var that = this,
+    drag = d3.behavior.drag()
     .on('drag', function(d,i) {
-      var realX = d3.event.x - (this.radius + this.padding),
-          realY = d3.event.y - (this.radius + this.padding),
+      var realX = d3.event.x - (that._plotRadius + that._padding),
+          realY = d3.event.y - (that._plotRadius + that._padding),
           r = Math.sqrt(Math.pow(realX,2) + Math.pow(realY,2)),// - inner;
-          val = Math.floor(this.scale.invert(r)),
+          val = Math.floor(that._scale.invert(r)),
           ci = i, sum, values, draggedName, ext;
       
       for(var name in scope.dsn) {
@@ -316,69 +440,76 @@ ui.d3.RadialPlot.prototype.getDragBehaviour = function(scope) {
       });
 
       sum = 0;
-      values = this.map(scope.dsn, function(row) { sum += row.value; return row.value; });
-      ext = this.check(sum) ? '' : '-invalid';
+      values = that._map(scope.dsn, function(row) { sum += row.value; return row.value; });
+      ext = that._checkTotal(sum) ? '' : '-invalid';
 
-      d3.select(this.element).selectAll('.area,.area-invalid').remove();
-      this.areaCanvas.append('path').datum(values)
+      d3.select(that._element).selectAll('.area,.area-invalid').remove();
+      that.areaCanvas.append('path').datum(values)
         .attr('class', 'area' + ext)
-        .attr('transform', 'translate(' + (this.radius + this.padding) + ', ' + (this.radius + this.padding) + ')')
-        .attr('d', this.line);
+        .attr('transform', 'translate(' + (that._plotRadius + that._padding) + ', ' + (that._plotRadius + that._padding) + ')')
+        .attr('d', that.line);
       d3.select(this)
         .attr('cx', function(d,i) {
-          console.log(scope.dsn);
-          console.log(draggedName);
-          console.log(scope.dsn[draggedName]);
-           var x = (d.value === 0) ? this.inner : this.scale(scope.dsn[draggedName].value);
-           var cx = x * Math.sin(this.angle(scope.dsn[draggedName].id));
+           var x = (d.value === 0) ? that.inner : that._scale(scope.dsn[draggedName].value);
+           var cx = x * Math.sin(that.angle(scope.dsn[draggedName].id));
            return cx;
-        }.bind(this))
+        })
         .attr('cy', function(d,i) {
-           var x = (d.value === 0) ? this.inner : this.scale(scope.dsn[draggedName].value);
-           var cy = - x * Math.cos(this.angle(scope.dsn[draggedName].id));
+           var x = (d.value === 0) ? that.inner : that._scale(scope.dsn[draggedName].value);
+           var cy = - x * Math.cos(that.angle(scope.dsn[draggedName].id));
            return cy;
-        }.bind(this));
+        });
 
-      d3.select(this.element).selectAll('.point,.point-invalid').attr('class', 'point' + ext);
-    }.bind(this));
-
-  drag.on('dragstart', function() {
-    this.inDrag = true;
-  });
-  drag.on('dragend', function() {
-    this.inDrag = false;
-  });
-
+      d3.select(that._element).selectAll('.point,.point-invalid').attr('class', 'point' + ext);
+    })
+    .on('dragstart', function() {
+      that._inDrag = true;
+    })
+    .on('dragend', function() {
+      that._inDrag = false;
+    });
   return drag;
 };
 
-ui.d3.RadialPlot.prototype.addSceneTransitions = function(scenes, area, points) {
+ui.d3.RadialPlot.prototype._addSceneTransitions = function(scenes, area, points) {
   var delay = 0,
       previous = this.origin;
     
   if(typeof scenes !== 'undefined') {
     scenes.forEach(function(scene) {
       var sum = 0;
-      scene = this.map(scene, function(row) { sum += row.value; return row.value; });
-      area.transition().ease('linear').delay(delay).duration(this.animateDuration).attrTween('d', this.lineTween(previous, scene));
+      scene = this._map(scene, function(row) { sum += row.value; return row.value; });
+      area.transition().ease('linear').delay(delay).duration(this._animateDuration).attrTween('d', this._lineTween(previous, scene));
       previous = scene;
-      delay += this.animateDuration + this.delayDuration;
+      delay += this._animateDuration + this._delayDuration;
     }.bind(this));
   }
-  area.transition().ease('linear').delay(delay).duration(this.animateDuration).attrTween('d', this.lineTween(previous));
-  delay += this.animateDuration + this.delayDuration;
+  area.transition().ease('linear').delay(delay).duration(this._animateDuration).attrTween('d', this._lineTween(previous));
+  delay += this._animateDuration + this._delayDuration;
 
   points.transition()
    .delay(delay)
    .duration(50)
-   .attr('r', this.pointRadius);
+   .attr('r', this._pointRadius);
 };
 
 ui.radialplot = function() {
   function link(scope, element, attrs) {
+    var radialPlot = new ui.d3.RadialPlot(element[0])
+        .setPlotRadius(parseInt(attrs.plotRadius))
+        .setInnerRadius(parseInt(attrs.innerRadius))
+        .setPadding(parseInt(attrs.padding))
+        .setPointRadius(parseFloat(attrs.pointRadius))
+        .setEditable((attrs.editable === 'true'))
+        .setLabelled((attrs.labelled === 'true'))
+        .setAnimated((attrs.animate === 'false')? false : true)
+        .setAnimationTimes(parseInt(attrs.animateDuration), parseInt(attrs.delayDuration))
+        .setScaleType(attrs.scale)
+        .setFreeDraw((attrs.free === 'true'));
+
+    // Watch statement that triggers redraw of content. 
     scope.$watch('dsn', function(dsn) {
-      var radialPlot = new ui.d3.RadialPlot(scope, element, attrs);
-      radialPlot.onDataLoaded_(dsn, scope.compare, scope.play, scope);
+      radialPlot.onDataChanged(dsn, scope.compare, scope.play, scope);
     }.bind(this), true);
   }
 
