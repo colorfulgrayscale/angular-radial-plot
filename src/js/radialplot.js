@@ -5,9 +5,7 @@ var ui = ui || { d3: {} };
 
 /**
  * @constructor
- * @param scope
- * @param element
- * @param attrs
+ * @param {Element} element
  */
 ui.d3.RadialPlot = function(element) {
   this._radians = 2 * Math.PI;
@@ -206,13 +204,19 @@ ui.d3.RadialPlot.prototype.onDataChanged = function(dsn, compare, scenes, scope)
  * Private Methods for internal workings 
  */
 
-//Todo: Re-architect
+//Todo: Re-architect, simplify
 
+/**
+ * @param {String} className
+ */
 ui.d3.RadialPlot.prototype._setElementClass = function(className) {
   d3.select(this._element).attr('class', className);
 };
 
-ui.d3.RadialPlot.prototype._clearElementContents = function(className) {
+/**
+ * 
+ */
+ui.d3.RadialPlot.prototype._clearElementContents = function() {
   d3.select(this._element).selectAll('*').remove();
 }
 
@@ -499,6 +503,9 @@ ui.d3.RadialPlot.prototype._addSceneTransitions = function(scenes, area, points)
    .attr('r', this._pointRadius);
 };
 
+/**
+ * Create directive in namespace
+ */
 ui.radialplot = function() {
   function link(scope, element, attrs) {
     var radialPlot = new ui.d3.RadialPlot(element[0])
@@ -531,5 +538,8 @@ ui.radialplot = function() {
   };
 };
 
+/**
+ * Expose directive
+ */
 angular.module('ui.radialplot', [])
   .directive('radialPlot', ui.radialplot);
