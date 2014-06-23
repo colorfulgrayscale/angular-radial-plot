@@ -18,6 +18,7 @@ git clone https://github.com/GordyD/radialplot.git
 cd angular-radial-plot`.
 npm install
 bower install
+npm test
 node app.js
 ```
 Go to `http://localhost:3000/example.html` to see example radial plots.
@@ -44,6 +45,4 @@ Features
  
 Planned Improvements
 --------------------
-
-- Unit tests 
 - Improve interactive mode on mobile
