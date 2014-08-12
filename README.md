@@ -1,5 +1,6 @@
 Angular.js Radial Plot Directive
 ================================
+[![Build Status](https://travis-ci.org/GordyD/angular-radial-plot.svg?branch=master)](https://travis-ci.org/GordyD/angular-radial-plot)
 
 I think radar graphs are cool. I also think Angular.js and d3.js are cool, so I decided to create an Angular.js directive for creating customisable radial plots... and *BLAM*, here it is!
 
@@ -17,6 +18,7 @@ git clone https://github.com/GordyD/radialplot.git
 cd angular-radial-plot`.
 npm install
 bower install
+npm test
 node app.js
 ```
 Go to `http://localhost:3000/example.html` to see example radial plots.
@@ -43,6 +45,4 @@ Features
  
 Planned Improvements
 --------------------
-
-- Unit tests 
 - Improve interactive mode on mobile
