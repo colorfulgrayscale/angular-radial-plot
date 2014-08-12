@@ -302,9 +302,10 @@ ui.d3.RadialPlot.prototype._clearElementContents = function() {
 
 ui.d3.RadialPlot.prototype._setScale = function(scale) {
   if (scale === 'log') {
+      var one = this._plotRadius/100*2;
       this._scale = d3.scale.log()
-      .domain([this._tendToZero, 100])
-      .range([this._innerRadius, this._innerRadius + this._plotRadius]);
+      .domain([this._tendToZero, 1, 100])
+      .range([this._innerRadius, this._innerRadius + one, this._innerRadius + this._plotRadius]);
   } else {
       this._scale = d3.scale.linear()
       .domain([this._tendToZero, 100])
